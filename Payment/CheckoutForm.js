@@ -16,73 +16,67 @@ const CheckoutForm = ({ orderTotal }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // Allow only numbers for cardNumber and cvv
+    // Allow only numeric input for cardNumber and cvv
     if ((name === "cardNumber" || name === "cvv") && !/^\d*$/.test(value)) {
-      return; // Reject non-numeric characters
+      return;
+    }
+
+    // Restrict cardNumber to 16 digits and cvv to 3 digits
+    if (name === "cardNumber" && value.length > 16) {
+      return;
+    }
+    if (name === "cvv" && value.length > 3) {
+      return;
     }
 
     setFormData({ ...formData, [name]: value });
-
-    // Perform validation as the user types
     validateField(name, value);
   };
 
   const handlePaymentMethodSelect = (method) => {
     setFormData({ ...formData, paymentMethod: method });
-    setErrors({ ...errors, paymentMethod: "" }); // Clear any previous errors
-    validateForm(); // Check overall form validity
+    setErrors({ ...errors, paymentMethod: "" });
+    validateForm();
   };
 
   const validateField = (name, value) => {
     let error = "";
+
     if (name === "address" && !value.trim()) {
       error = "Address is required.";
-    }
-    if (name === "nameOnCard" && !value.trim()) {
+    } else if (name === "nameOnCard" && !value.trim()) {
       error = "Name on Card is required.";
-    }
-    if (name === "cardNumber" && (!/^\d{16}$/.test(value))) {
+    } else if (name === "cardNumber" && value.length !== 16) {
       error = "Card Number must be exactly 16 digits.";
-    }
-    if (name === "expiryDate" && !/^(0[1-9]|1[0-2])\/\d{2}$/.test(value)) {
+    } else if (name === "expiryDate" && !/^(0[1-9]|1[0-2])\/\d{2}$/.test(value)) {
       error = "Expiry Date must be in MM/YY format.";
-    }
-    if (name === "cvv" && (!/^\d{3}$/.test(value))) {
-      error = "CVV must be 3 digits.";
+    } else if (name === "cvv" && value.length !== 3) {
+      error = "CVV must be exactly 3 digits.";
+    } else if (name === "paymentMethod" && !value) {
+      error = "Please select a payment method.";
     }
 
     setErrors({ ...errors, [name]: error });
-    validateForm(); // Check overall form validity
+    validateForm();
   };
 
   const validateForm = () => {
     const allValid =
       formData.address &&
       formData.nameOnCard &&
-      /^\d{16}$/.test(formData.cardNumber) &&
+      formData.cardNumber.length === 16 &&
       /^(0[1-9]|1[0-2])\/\d{2}$/.test(formData.expiryDate) &&
-      /^\d{3,4}$/.test(formData.cvv) &&
+      formData.cvv.length === 3 &&
       formData.paymentMethod;
-
-    console.log("Form validation status:", {
-      address: !!formData.address,
-      nameOnCard: !!formData.nameOnCard,
-      cardNumber: /^\d{16}$/.test(formData.cardNumber),
-      expiryDate: /^(0[1-9]|1[0-2])\/\d{2}$/.test(formData.expiryDate),
-      cvv: /^\d{3,4}$/.test(formData.cvv),
-      paymentMethod: !!formData.paymentMethod,
-    });
 
     setIsFormValid(allValid);
   };
 
   const handleConfirmPayment = () => {
     if (!isFormValid) {
-      console.log("Form is not valid");
       alert("Please fill in all required fields correctly.");
       return;
     }
-    console.log("Payment confirmed successfully!", formData);
     alert(`Payment of $${orderTotal.toFixed(2)} was successful!`);
   };
 
