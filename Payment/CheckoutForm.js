@@ -16,12 +16,10 @@ const CheckoutForm = ({ orderTotal }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // Allow only numeric input for cardNumber and cvv
     if ((name === "cardNumber" || name === "cvv") && !/^\d*$/.test(value)) {
       return;
     }
 
-    // Restrict cardNumber to 16 digits and cvv to 3 digits
     if (name === "cardNumber" && value.length > 16) {
       return;
     }
